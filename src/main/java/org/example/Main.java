@@ -1,37 +1,28 @@
 package org.example;
 
-import com.gridnine.testing.Flight;
-import com.gridnine.testing.FlightBuilder;
-import com.gridnine.testing.Segment;
+
+import com.gridnine.testing.Dao.FlightBuilder;
+import com.gridnine.testing.entity.Flight;
+import com.gridnine.testing.service.FlightFilterBuilderImpl;
 
 import java.util.List;
 
-import static com.gridnine.testing.FlightBuilder.*;
-
-
 public class Main {
     public static void main(String[] args) {
-        System.out.println(FlightBuilder.createFlights());
-        List<Flight> filteredFlights = filterFlights();
-        System.out.println("Фильтрованные вылеты до текущего момента времени: ");
-        for (Flight flight : filteredFlights) {
-            for (Segment segment : flight.getSegments()) {
-                System.out.println("Вылет: " + segment.getDepartureDate());
-            }
-        }
-        List<Flight> filteredFlights1 = filterFlights1();
-        System.out.println("Фильтрованные cегменты с датой прилёта раньше даты вылета:");
-        for (Flight flight : filteredFlights1) {
-            for (Segment segment : flight.getSegments()) {
-                System.out.println("Прилёт: " + segment.getArrivalDate());
-            }
-        }
-        List<Flight> filteredFlights2 = filterFlights2();
-        System.out.println("Перелеты, где общее время, проведённое на земле, превышает два часа: ");
-        for (Flight flight : filteredFlights2) {
-            for (Segment segment : flight.getSegments()) {
-                System.out.println("Вылет: " + segment.getDepartureDate() + " Прилёт: " + segment.getArrivalDate());
-            }
-        }
+        List<Flight> flights = FlightBuilder.createFlights();
+        List<Flight> flightsDepartureBeforeNow = new FlightFilterBuilderImpl(flights)
+                .filterDepartureBeforeNow()
+                .build();
+        List<Flight> flightsArrivalBeforeDeparture = new FlightFilterBuilderImpl(flights)
+                .filterArrivalBeforeDeparture()
+                .build();
+        List<Flight> flightsTimeOnGroundMoreThanTwoHours = new FlightFilterBuilderImpl(flights)
+                .filterSumTimeOnGroundMoreThanTwoHours()
+                .build();
+
+        System.out.println("Нефильтрованные полёты:\n" + flights);
+        System.out.println("Вылет до текущего момента времени:\n" + flightsDepartureBeforeNow);
+        System.out.println("Сегменты с датой прилёта раньше даты вылета:\n" + flightsArrivalBeforeDeparture);
+        System.out.println("Перелеты, где общее время, проведённое на земле, превышает два часа:\n" + flightsTimeOnGroundMoreThanTwoHours);
     }
 }
